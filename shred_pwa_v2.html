@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SHRED76">
+<meta name="theme-color" content="#080808">
+<title>SHRED76 — Transformation App</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080808; --s1:#111111; --s2:#181818; --s3:#202020;
+  --b1:#2a2a2a; --b2:#383838;
+  --txt:#F2F0EB; --sub:#999990; --faint:#444440;
+  --or:#FF5722; --or2:#FF7043; --ord:rgba(255,87,34,.12);
+  --gn:#22C55E; --gn2:#4ADE80; --gnd:rgba(34,197,94,.1);
+  --bl:#3B82F6; --bl2:#60A5FA; --bld:rgba(59,130,246,.1);
+  --yw:#EAB308; --yw2:#FACC15; --ywd:rgba(234,179,8,.1);
+  --rd:#EF4444; --rd2:#F87171; --rdd:rgba(239,68,68,.1);
+  --pu:#A855F7; --pu2:#C084FC; --pud:rgba(168,85,247,.1);
+  --safe-t:env(safe-area-inset-top,44px);
+  --safe-b:env(safe-area-inset-bottom,34px);
+  --nh:60px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+html,body{height:100%;background:var(--bg);overflow:hidden}
+body{font-family:'Inter',sans-serif;color:var(--txt);font-size:15px;line-height:1.55;overscroll-behavior:none}
+#app{display:flex;flex-direction:column;height:100%;height:-webkit-fill-available}
+
+/* TOP BAR */
+#topbar{padding:calc(var(--safe-t) + 8px) 18px 10px;background:rgba(8,8,8,.97);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--b1);flex-shrink:0;z-index:100}
+.tb-inner{display:flex;align-items:center;justify-content:space-between}
+.app-logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:var(--or);line-height:1}
+.app-tagline{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint);letter-spacing:1px;margin-top:1px}
+.goal-pill{background:var(--s2);border:1px solid var(--b2);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;color:var(--gn2);font-family:'JetBrains Mono',monospace;letter-spacing:.5px}
+
+/* SCROLL */
+#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;padding-bottom:calc(var(--nh) + var(--safe-b) + 20px)}
+
+/* BOTTOM NAV */
+#bnav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nh) + var(--safe-b));padding-bottom:var(--safe-b);background:rgba(8,8,8,.98);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--b1);display:flex;align-items:center;z-index:200}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;padding:6px 2px;cursor:pointer;border:none;background:none;color:var(--faint);transition:transform .15s;user-select:none}
+.ni:active{transform:scale(.85)}
+.ni.active .ni-ico{color:var(--or)}
+.ni.active .ni-lbl{color:var(--or)}
+.ni-ico{font-size:21px;line-height:1;margin-bottom:2px}
+.ni-lbl{font-size:8px;font-family:'JetBrains Mono',monospace;letter-spacing:.5px;text-transform:uppercase;color:var(--faint)}
+.ni.active .ni-lbl{color:var(--or)}
+
+/* PAGES */
+.pg{display:none;padding:14px 15px 0;animation:fIn .22s ease}
+.pg.active{display:block}
+@keyframes fIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── SHARED ATOMS ── */
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:15px;margin-bottom:12px;overflow:hidden}
+.row-sep{display:flex;gap:10px;margin-bottom:12px}
+.row-sep > *{flex:1}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--sub);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.lbl::after{content:'';flex:1;height:1px;background:var(--b1)}
+
+/* CALLOUTS */
+.note{border-left:3px solid;border-radius:0 10px 10px 0;padding:11px 14px;margin-bottom:11px;font-size:13px;line-height:1.65;font-weight:400}
+.note b{font-weight:700}
+.note.or{border-color:var(--or);background:var(--ord);color:#FFB090}
+.note.gn{border-color:var(--gn);background:var(--gnd);color:var(--gn2)}
+.note.bl{border-color:var(--bl);background:var(--bld);color:var(--bl2)}
+.note.yw{border-color:var(--yw);background:var(--ywd);color:var(--yw2)}
+.note.rd{border-color:var(--rd);background:var(--rdd);color:var(--rd2)}
+.note.pu{border-color:var(--pu);background:var(--pud);color:var(--pu2)}
+
+/* STAT TILES */
+.stat-g{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.stat-g.f4{grid-template-columns:repeat(4,1fr)}
+.stat-t{background:var(--s2);border:1px solid var(--b1);border-radius:12px;padding:12px 10px;text-align:center}
+.st-l{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.st-v{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--or2);letter-spacing:.5px;line-height:1}
+.st-s{font-size:10px;color:var(--faint);margin-top:2px}
+
+/* CHIPS */
+.chip{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 8px;border-radius:4px;display:inline-block;letter-spacing:.3px}
+.ch-or{background:var(--ord);color:var(--or2)}
+.ch-gn{background:var(--gnd);color:var(--gn2)}
+.ch-bl{background:var(--bld);color:var(--bl2)}
+.ch-yw{background:var(--ywd);color:var(--yw2)}
+.ch-rd{background:var(--rdd);color:var(--rd2)}
+.ch-s3{background:var(--s3);color:var(--sub)}
+
+/* MACRO BARS */
+.mb-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.mb-lbl{font-size:11px;color:var(--sub);width:72px;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+.mb-bg{flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden}
+.mb-fill{height:100%;border-radius:3px}
+.mb-val{font-size:10px;font-family:'JetBrains Mono',monospace;min-width:95px;text-align:right}
+
+/* WORKOUT */
+.day-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none}
+.day-row::-webkit-scrollbar{display:none}
+.dp{flex-shrink:0;min-width:60px;background:var(--s1);border:1.5px solid var(--b1);border-radius:11px;padding:9px 8px;text-align:center;cursor:pointer;transition:all .18s}
+.dp.active{background:var(--ord);border-color:var(--or)}
+.dp.rp{opacity:.35;cursor:default}
+.dp .dn{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--sub);letter-spacing:1px;margin-bottom:2px}
+.dp .dt{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--or);letter-spacing:.3px}
+.dp.rp .dt{color:var(--faint)}
+
+.ex-c{background:var(--s2);border:1px solid var(--b1);border-left:3px solid var(--or);border-radius:0 12px 12px 0;padding:13px 14px;margin-bottom:9px}
+.ex-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px}
+.ex-nm{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.5px;color:var(--txt);line-height:1.05}
+.ex-st{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--or2);margin-bottom:5px}
+.ex-btn{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--or);display:inline-flex;align-items:center;gap:4px;cursor:pointer;padding:4px 0;letter-spacing:.3px;user-select:none}
+.ex-detail{display:none;margin-top:8px}
+.ex-detail.open{display:block}
+.ex-fm{font-size:12px;color:var(--sub);line-height:1.7;border-left:2px solid var(--b2);padding-left:10px;margin-bottom:6px}
+.ex-wy{font-size:11px;color:var(--gn2);font-style:italic}
+
+/* PROGRESS TABLE */
+.pt{border:1px solid var(--b1);border-radius:12px;overflow:hidden;margin-bottom:12px}
+.pt-h{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;background:var(--s2)}
+.pt-r{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;border-top:1px solid var(--b1)}
+.pt-r:nth-child(even){background:rgba(255,255,255,.018)}
+.ptc{padding:8px 8px;font-size:11px;color:var(--sub)}
+.ptc.h{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--faint)}
+.ptc.lft{color:var(--txt);font-weight:500}
+.ptc.w1{color:var(--rd2);font-family:'JetBrains Mono',monospace;font-size:10px}
+.ptc.w4{color:var(--yw2);font-family:'JetBrains Mono',monospace;font-size:10px}
+.ptc.w8{color:var(--gn2);font-family:'JetBrains Mono',monospace;font-size:10px}
+
+/* DIET TIMELINE */
+.ml{position:relative;padding-left:22px}
+.ml::before{content:'';position:absolute;left:7px;top:6px;bottom:0;width:1.5px;background:linear-gradient(to bottom,var(--or),var(--b1) 88%)}
+.mi{position:relative;margin-bottom:16px}
+.mi-dot{position:absolute;left:-17px;top:5px;width:12px;height:12px;border-radius:50%;border:2px solid var(--or);background:var(--bg)}
+.mi-dot.gn{border-color:var(--gn)}.mi-dot.bl{border-color:var(--bl)}.mi-dot.yw{border-color:var(--yw)}.mi-dot.dm{border-color:var(--faint)}
+.mi-t{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--or);margin-bottom:1px;letter-spacing:.3px}
+.mi-t.gn{color:var(--gn2)}.mi-t.bl{color:var(--bl2)}.mi-t.yw{color:var(--yw2)}.mi-t.dm{color:var(--sub)}
+.mi-nm{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:.5px;color:var(--txt);margin-bottom:3px}
+.mi-f{font-size:13px;color:var(--sub);line-height:1.75;margin-bottom:5px}
+.mi-f strong{color:var(--txt);font-weight:600}
+.mi-f em{color:var(--or2);font-style:normal;font-size:12px}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px}
+.tag{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 7px;border-radius:4px}
+.to{background:var(--ord);color:var(--or2)}.tg{background:var(--gnd);color:var(--gn2)}.tb{background:var(--bld);color:var(--bl2)}.ty{background:var(--ywd);color:var(--yw2)}.tr{background:var(--rdd);color:var(--rd2)}
+.mi-note{font-size:11px;color:var(--faint);font-style:italic;line-height:1.6;padding-top:2px}
+
+/* SUPPLEMENTS */
+.sc{background:var(--s2);border:1px solid var(--b1);border-radius:12px;padding:13px 14px;margin-bottom:9px}
+.sc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px}
+.sc-nm{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:.5px;color:var(--txt)}
+.sc-dose{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--yw2);margin-bottom:5px}
+.sc-why{font-size:12px;color:var(--sub);line-height:1.6;margin-bottom:4px}
+.sc-cost{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--or2)}
+
+/* TIMING */
+.tc-b{background:var(--s2);border:1px solid var(--b1);border-radius:12px;padding:12px 14px;margin-bottom:9px}
+.tc-t{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--or);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:8px}
+.tc-t::after{content:'';flex:1;height:1px;background:var(--b1)}
+.tc-r{display:flex;gap:8px;padding:4px 0;border-bottom:1px solid var(--b1);align-items:flex-start}
+.tc-r:last-child{border-bottom:none}
+.tc-tm{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--yw2);min-width:68px;flex-shrink:0}
+.tc-s{font-size:12px;color:var(--sub);flex:1;line-height:1.5}
+
+/* AYURVEDA */
+.ay{background:var(--s2);border:1px solid var(--b1);border-left:3px solid var(--gn);border-radius:0 12px 12px 0;padding:13px 14px;margin-bottom:9px}
+.ay-nm{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--gn2);margin-bottom:1px}
+.ay-aka{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint);margin-bottom:6px}
+.ay-dose{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--yw2);margin-bottom:5px}
+.ay-txt{font-size:12px;color:var(--sub);line-height:1.6}
+.ay-tag{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--gn2);margin-top:5px}
+
+/* SKIN STEPS */
+.sk{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--b1)}
+.sk:last-child{border-bottom:none}
+.sk-n{width:26px;height:26px;border-radius:50%;background:var(--ord);border:1px solid rgba(255,87,34,.3);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--or2);flex-shrink:0;margin-top:1px}
+.sk-a{font-size:14px;font-weight:600;color:var(--txt);margin-bottom:1px}
+.sk-p{font-size:12px;color:var(--sub);margin-bottom:2px}
+.sk-w{font-size:11px;color:var(--faint);font-style:italic;line-height:1.5}
+
+/* SCHEDULE */
+.sr{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--b1)}
+.sr:last-child{border-bottom:none}
+.sr-t{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--or2);min-width:58px;flex-shrink:0;padding-top:1px}
+.sr-l{font-size:14px;font-weight:600;color:var(--txt);margin-bottom:1px}
+.sr-d{font-size:12px;color:var(--sub);line-height:1.5}
+.sr-b{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 7px;border-radius:4px;margin-top:3px}
+
+/* MED / MILESTONE */
+.med{background:var(--s2);border:1px solid rgba(234,179,8,.15);border-radius:12px;padding:13px 14px;margin-bottom:9px}
+.med-nm{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--yw2);margin-bottom:2px}
+.med-cat{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sub);letter-spacing:1px;margin-bottom:6px}
+.med-dose{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--or2);margin-bottom:5px}
+.med-why{font-size:12px;color:var(--sub);line-height:1.6;margin-bottom:4px}
+.med-safe{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--gn2)}
+.ms{background:var(--s2);border:1px solid var(--b1);border-radius:12px;padding:13px 14px;margin-bottom:9px}
+.ms-mo{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--or2);margin-bottom:4px}
+.ms-b{font-size:13px;color:var(--sub);line-height:1.65}
+.ms-b strong{color:var(--txt)}
+
+/* HERO CARD */
+.hc{background:linear-gradient(135deg,#130a06,#06100a,#060a13);border:1px solid var(--b2);border-radius:18px;padding:18px;margin-bottom:14px;position:relative;overflow:hidden}
+.hc::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(255,87,34,.14),transparent 70%)}
+.hc-tag{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--or);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+.hc-title{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:1px;line-height:.95;color:var(--txt);margin-bottom:6px}
+.hc-title span{color:var(--or)}
+.hc-sub{font-size:13px;color:var(--sub);line-height:1.6}
+
+/* ASSESS */
+.ar{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--b1)}
+.ar:last-child{border-bottom:none}
+.ar-k{font-size:12px;color:var(--sub)}
+.ar-now{font-size:12px;color:var(--rd2);font-weight:600}
+.ar-tgt{font-size:12px;color:var(--gn2);font-weight:600}
+.ar-arr{font-size:11px;color:var(--faint);padding:0 4px}
+
+/* INSTALL BANNER */
+#ibanner{position:fixed;bottom:calc(var(--nh) + var(--safe-b) + 10px);left:14px;right:14px;background:var(--s2);border:1px solid var(--b2);border-radius:14px;padding:13px 14px;display:flex;gap:10px;align-items:center;z-index:150;box-shadow:0 8px 28px rgba(0,0,0,.7);animation:su .4s ease}
+@keyframes su{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.ib-ico{font-size:26px;flex-shrink:0}
+.ib-t strong{display:block;font-size:13px;font-weight:600;color:var(--txt);margin-bottom:1px}
+.ib-t span{font-size:11px;color:var(--sub)}
+.ib-x{background:none;border:none;color:var(--faint);font-size:18px;padding:4px;cursor:pointer;flex-shrink:0;line-height:1}
+
+/* DAY NAV in DIET */
+.diet-day-row{display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none}
+.diet-day-row::-webkit-scrollbar{display:none}
+.ddp{flex-shrink:0;min-width:52px;background:var(--s1);border:1.5px solid var(--b1);border-radius:10px;padding:7px 6px;text-align:center;cursor:pointer;transition:all .18s}
+.ddp.active{background:var(--gnd);border-color:var(--gn)}
+.ddp .ddn{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--sub);letter-spacing:1px;margin-bottom:1px}
+.ddp .ddt{font-size:11px;font-weight:600;color:var(--gn2)}
+.ddp.active .ddt{color:var(--gn2)}
+
+/* FOOD ROW */
+.fi{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--b1);align-items:flex-start}
+.fi:last-child{border-bottom:none}
+.fi-dot{width:6px;height:6px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.fi-txt{font-size:13px;color:var(--sub);line-height:1.5}
+.fi-txt strong{color:var(--txt);font-weight:600}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="tb-inner">
+    <div>
+      <div class="app-logo">⚡ SHRED76</div>
+      <div class="app-tagline">76kg · High Muscle · Low Fat · Delhi</div>
+    </div>
+    <div class="goal-pill">TARGET: 76KG</div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div id="content">
+
+<!-- ══════ HOME ══════ -->
+<div id="pg-home" class="pg active">
+  <div style="height:10px"></div>
+  <div class="hc">
+    <div class="hc-tag">Body Recomposition · Delhi Bachelor</div>
+    <div class="hc-title">BUILD<br><span>MUSCLE.</span><br>BURN FAT.</div>
+    <div class="hc-sub">Target: 76 kg lean, muscular, 10–12% body fat. High protein, low carb, compound training, Ayurvedic recovery stack.</div>
+  </div>
+
+  <div class="lbl">Your transformation gap</div>
+  <div class="card">
+    <div class="ar"><span class="ar-k">Weight</span><span class="ar-now">80 kg</span><span class="ar-arr">→</span><span class="ar-tgt">76 kg lean</span></div>
+    <div class="ar"><span class="ar-k">Body fat</span><span class="ar-now">~21%</span><span class="ar-arr">→</span><span class="ar-tgt">10–12%</span></div>
+    <div class="ar"><span class="ar-k">Midsection</span><span class="ar-now">Soft, protruding</span><span class="ar-arr">→</span><span class="ar-tgt">Six-pack</span></div>
+    <div class="ar"><span class="ar-k">Back</span><span class="ar-now">No separation</span><span class="ar-arr">→</span><span class="ar-tgt">Wide + defined</span></div>
+    <div class="ar"><span class="ar-k">Skin</span><span class="ar-now">Dull, uneven</span><span class="ar-arr">→</span><span class="ar-tgt">Bright + glowing</span></div>
+    <div class="ar"><span class="ar-k">Hair</span><span class="ar-now">Good base</span><span class="ar-arr">→</span><span class="ar-tgt">Model density</span></div>
+  </div>
+
+  <div class="lbl">Daily nutrition targets</div>
+  <div class="stat-g f4">
+    <div class="stat-t"><div class="st-l">Calories</div><div class="st-v">1,950</div><div class="st-s">Recomp</div></div>
+    <div class="stat-t"><div class="st-l">Protein</div><div class="st-v" style="color:var(--gn2)">190g</div><div class="st-s">★ Priority</div></div>
+    <div class="stat-t"><div class="st-l">Carbs</div><div class="st-v" style="color:var(--yw2)">120g</div><div class="st-s">Low / timed</div></div>
+    <div class="stat-t"><div class="st-l">Fats</div><div class="st-v" style="color:var(--bl2)">75g</div><div class="st-s">Healthy</div></div>
+  </div>
+
+  <div class="lbl">The 5 non-negotiables</div>
+  <div class="note or"><b>1. Protein 190g every day</b> — hit this before worrying about anything else. Muscle cannot be built or preserved without it.</div>
+  <div class="note gn"><b>2. Carbs only around training</b> — pre-gym and post-gym. Zero carbs at dinner. This is how you lose fat while building muscle simultaneously.</div>
+  <div class="note bl"><b>3. Compound lifts + progressive overload</b> — add 2.5 kg every week. This single habit is 80% of your physique transformation.</div>
+  <div class="note yw"><b>4. Sleep 7.5 hrs minimum</b> — muscle builds and fat burns during deep sleep. Magnesium Glycinate will fix your sleep quality within a week.</div>
+  <div class="note pu"><b>5. Consistency over 6 months</b> — you will be unrecognisable. Show up even on bad days. The first 10 minutes are always the hardest.</div>
+</div>
+
+<!-- ══════ WORKOUT ══════ -->
+<div id="pg-workout" class="pg">
+  <div style="height:10px"></div>
+  <div class="note or"><b>5-day compound-first protocol.</b> Mon/Thu = Full Body A · Tue/Fri = Full Body B · Sat = Arms + Abs. Wed + Sun = complete rest. Max 5 exercises per session. Tap any exercise to expand form cues.</div>
+
+  <div class="lbl">Select training day</div>
+  <div class="day-row">
+    <div class="dp active" onclick="showDay('mon',this)" id="wp-mon"><div class="dn">MON</div><div class="dt">FULL A</div></div>
+    <div class="dp" onclick="showDay('tue',this)" id="wp-tue"><div class="dn">TUE</div><div class="dt">FULL B</div></div>
+    <div class="dp rp"><div class="dn">WED</div><div class="dt" style="color:var(--faint)">REST</div></div>
+    <div class="dp" onclick="showDay('thu',this)" id="wp-thu"><div class="dn">THU</div><div class="dt">FULL A</div></div>
+    <div class="dp" onclick="showDay('fri',this)" id="wp-fri"><div class="dn">FRI</div><div class="dt">FULL B</div></div>
+    <div class="dp" onclick="showDay('sat',this)" id="wp-sat"><div class="dn">SAT</div><div class="dt">ARMS</div></div>
+    <div class="dp rp"><div class="dn">SUN</div><div class="dt" style="color:var(--faint)">REST</div></div>
+  </div>
+  <div id="day-panel"></div>
+
+  <div class="lbl" style="margin-top:4px">Strength benchmarks</div>
+  <div class="pt">
+    <div class="pt-h"><div class="ptc h">Lift</div><div class="ptc h">Week 1</div><div class="ptc h">Week 4</div><div class="ptc h">Week 8</div></div>
+    <div class="pt-r"><div class="ptc lft">Back Squat</div><div class="ptc w1">35–40kg</div><div class="ptc w4">52–55kg</div><div class="ptc w8">68–72kg</div></div>
+    <div class="pt-r"><div class="ptc lft">Deadlift</div><div class="ptc w1">45–50kg</div><div class="ptc w4">65–70kg</div><div class="ptc w8">85–90kg</div></div>
+    <div class="pt-r"><div class="ptc lft">Bench Press</div><div class="ptc w1">30–35kg</div><div class="ptc w4">47–52kg</div><div class="ptc w8">60–65kg</div></div>
+    <div class="pt-r"><div class="ptc lft">Overhead Press</div><div class="ptc w1">20–25kg</div><div class="ptc w4">32–37kg</div><div class="ptc w8">42–47kg</div></div>
+    <div class="pt-r"><div class="ptc lft">Barbell Row</div><div class="ptc w1">30–35kg</div><div class="ptc w4">47–52kg</div><div class="ptc w8">62–67kg</div></div>
+    <div class="pt-r"><div class="ptc lft">Pull-ups</div><div class="ptc w1">Assisted</div><div class="ptc w4">3–5 reps</div><div class="ptc w8">8–10 reps</div></div>
+  </div>
+</div>
+
+<!-- ══════ DIET ══════ -->
+<div id="pg-diet" class="pg">
+  <div style="height:10px"></div>
+  <div class="note gn"><b>High protein · Low carb · Carbs timed around training.</b> 190g protein daily protects and builds muscle. 120g carbs are strategically placed pre-gym and post-gym only. Fat replaces carbs as energy source. This combination maximises recomposition — simultaneous fat loss and muscle gain.</div>
+
+  <div class="lbl">Daily macro targets</div>
+  <div class="card">
+    <div class="mb-row"><div class="mb-lbl">Protein</div><div class="mb-bg"><div class="mb-fill" style="width:100%;background:var(--gn)"></div></div><div class="mb-val" style="color:var(--gn2)">190g · 760kcal · 39%</div></div>
+    <div class="mb-row"><div class="mb-lbl">Carbs</div><div class="mb-bg"><div class="mb-fill" style="width:42%;background:var(--yw)"></div></div><div class="mb-val" style="color:var(--yw2)">120g · 480kcal · 25%</div></div>
+    <div class="mb-row"><div class="mb-lbl">Healthy Fats</div><div class="mb-bg"><div class="mb-fill" style="width:52%;background:var(--bl)"></div></div><div class="mb-val" style="color:var(--bl2)">75g · 675kcal · 36%</div></div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint);text-align:right;margin-top:5px">Total: ~1,915 kcal/day</div>
+  </div>
+
+  <div class="lbl">Select day for meal plan</div>
+  <div class="diet-day-row">
+    <div class="ddp active" onclick="showDiet('mon',this)"><div class="ddn">MON</div><div class="ddt">Train</div></div>
+    <div class="ddp" onclick="showDiet('tue',this)"><div class="ddn">TUE</div><div class="ddt">Train</div></div>
+    <div class="ddp" onclick="showDiet('wed',this)"><div class="ddn">WED</div><div class="ddt">Rest</div></div>
+    <div class="ddp" onclick="showDiet('thu',this)"><div class="ddn">THU</div><div class="ddt">Train</div></div>
+    <div class="ddp" onclick="showDiet('fri',this)"><div class="ddn">FRI</div><div class="ddt">Train</div></div>
+    <div class="ddp" onclick="showDiet('sat',this)"><div class="ddn">SAT</div><div class="ddt">Train</div></div>
+    <div class="ddp" onclick="showDiet('sun',this)"><div class="ddn">SUN</div><div class="ddt">Rest</div></div>
+  </div>
+  <div id="diet-panel"></div>
+
+  <div class="lbl">Permanent food rules</div>
+  <div class="card">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--gn2);letter-spacing:1px;margin-bottom:8px">EAT FREELY</div>
+    <div class="fi"><div class="fi-dot" style="background:var(--gn)"></div><div class="fi-txt"><strong>Eggs + egg whites</strong> — your cheapest protein. Eat 4–6 daily.</div></div>
+    <div class="fi"><div class="fi-dot" style="background:var(--gn)"></div><div class="fi-txt"><strong>Chicken breast + fish</strong> — lean protein every dinner. Fish 3×/week.</div></div>
+    <div class="fi"><div class="fi-dot" style="background:var(--gn)"></div><div class="fi-txt"><strong>Paneer (dry only)</strong> — no cream gravies. Tikka/bhurji only.</div></div>
+    <div class="fi"><div class="fi-dot" style="background:var(--gn)"></div><div class="fi-txt"><strong>All dals</strong> — moong, masoor, chana. Protein + fibre.</div></div>
+    <div class="fi"><div class="fi-dot" style="background:var(--gn)"></div><div class="fi-txt"><strong>All vegetables</strong> — unlimited. Spinach, broccoli, cucumber, tomato.</div></div>
+    <div class="fi"><div class="fi-dot" style="background:var(--gn)"></div><div class="fi-txt"><strong>Walnuts + almonds</strong> — 10 each max. Healthy fats for hormones.</div></div>
+    <div class="fi"><div class="fi-dot" style="background:var(--gn)"></div><div class="fi-txt"><strong>Amla, berries, lemon</strong> — Vitamin C daily. Critical for skin + collagen.</div></div>
+    <div class="fi"><div class="fi-dot" style="background:var(--gn)"></div><div class="fi-txt"><strong>Black coffee + green tea</strong> — no sugar. L-Theanine with coffee.</div></div>
+  </div>
+  <div class="card">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--rd2);letter-spacing:1px;margin-bottom:8px">AVOID COMPLETELY</div>
+    <div class="fi"><div class="fi-dot" style="background:var(--rd)"></div><div class="fi-txt"><strong>Rice</strong> — at any meal. Primary fat storage trigger.</div></div>
+    <div class="fi"><div class="fi-dot" style="background:var(--rd)"></div><div class="fi-txt"><strong>Maida</strong> — naan, white bread, biscuits, samosa, bhature.</div></div>
+    <div class="fi"><div class="fi-dot" style="background:var(--rd)"></div><div class="fi-txt"><strong>Cream gravies</strong> — makhani, shahi, kadhai (800+ kcal/serving).</div></div>
+    <div class="fi"><div class="fi-dot" style="background:var(--rd)"></div><div class="fi-txt"><strong>Sugar in anything</strong> — tea, coffee, milk. Switch to zero.</div></div>
+    <div class="fi"><div class="fi-dot" style="background:var(--rd)"></div><div class="fi-txt"><strong>Cold drinks + packaged juice</strong> — liquid sugar ruins results.</div></div>
+    <div class="fi"><div class="fi-dot" style="background:var(--rd)"></div><div class="fi-txt"><strong>Alcohol</strong> — stops fat burning 48 hrs, crashes testosterone, ages skin.</div></div>
+    <div class="fi"><div class="fi-dot" style="background:var(--rd)"></div><div class="fi-txt"><strong>Eating out:</strong> Order tandoori/grilled + 2 rotis + dal + salad. Avoid fried.</div></div>
+  </div>
+</div>
+
+<!-- ══════ SUPPLEMENTS ══════ -->
+<div id="pg-supps" class="pg">
+  <div style="height:10px"></div>
+  <div class="note yw"><b>7 evidence-based supplements only.</b> Everything else removed. No fat burners. No stimulants. These 7 have the strongest clinical evidence for your specific goals: fat loss, muscle gain, energy, skin and hair.</div>
+
+  <div class="lbl">Daily timing — when to take what</div>
+  <div class="tc-b">
+    <div class="tc-t">5:45 AM — Pre-gym</div>
+    <div class="tc-r"><div class="tc-tm">5:45 AM</div><div class="tc-s">Creatine 5g in water · L-Theanine 100mg with black coffee</div></div>
+  </div>
+  <div class="tc-b">
+    <div class="tc-t">7:05 AM — Post-gym (within 20 min)</div>
+    <div class="tc-r"><div class="tc-tm">7:05 AM</div><div class="tc-s">Whey Isolate 1 scoop (30g) in cold water immediately</div></div>
+  </div>
+  <div class="tc-b">
+    <div class="tc-t">8:15 AM — With breakfast</div>
+    <div class="tc-r"><div class="tc-tm">8:15 AM</div><div class="tc-s">Vitamin D3 4,000 IU + K2 100mcg · Omega-3 1g · B-Complex · Collagen 10g + Biotin 5,000mcg (in warm water before food)</div></div>
+  </div>
+  <div class="tc-b">
+    <div class="tc-t">1:00 PM — With lunch</div>
+    <div class="tc-r"><div class="tc-tm">1:00 PM</div><div class="tc-s">Omega-3 second dose 1g · Zinc Picolinate 15mg</div></div>
+  </div>
+  <div class="tc-b">
+    <div class="tc-t">4:00 PM — Evening snack</div>
+    <div class="tc-r"><div class="tc-tm">4:00 PM</div><div class="tc-s">Whey Isolate 1 scoop (rest days only — replaces post-gym dose)</div></div>
+  </div>
+  <div class="tc-b">
+    <div class="tc-t">10:00 PM — Pre-sleep (30 min before)</div>
+    <div class="tc-r"><div class="tc-tm">10:00 PM</div><div class="tc-s">Magnesium Glycinate 300mg · Zinc Picolinate 15mg (second half) · Ashwagandha KSM-66 600mg · Triphala 1 tsp warm water</div></div>
+  </div>
+
+  <div class="lbl">The 7 essential supplements</div>
+
+  <div class="sc">
+    <div class="sc-top"><div class="sc-nm">Whey Protein Isolate</div><div class="chip ch-or">CORE #1</div></div>
+    <div class="sc-dose">1 scoop (30g) post-gym · 1 scoop 4PM on rest days</div>
+    <div class="sc-why">Hitting 190g protein daily on 1,950 kcal is impossible from food alone without going over calories. Isolate fills the gap cleanly — 27–30g protein per 120 kcal. MuscleBlaze Biozyme Isolate or ON Gold Standard.</div>
+    <div class="sc-cost">⏱ Post-gym daily · ₹1,800–2,200/month</div>
+  </div>
+
+  <div class="sc">
+    <div class="sc-top"><div class="sc-nm">Creatine Monohydrate</div><div class="chip ch-or">CORE #2</div></div>
+    <div class="sc-dose">5g daily — every day including rest days. No loading phase needed.</div>
+    <div class="sc-why">500+ clinical trials. Increases lifting strength 10–15% within 4 weeks. Increases muscle cell volume. Accelerates recovery between sets. Most proven supplement in existence. The strength gains directly enable greater progressive overload — which builds more muscle. Nutrabay Pure Monohydrate.</div>
+    <div class="sc-cost">⏱ Pre-gym · ₹400–600/month</div>
+  </div>
+
+  <div class="sc">
+    <div class="sc-top"><div class="sc-nm">Vitamin D3 + K2</div><div class="chip ch-or">CORE #3</div></div>
+    <div class="sc-dose">D3 4,000 IU + K2 100mcg combined · With breakfast (fat-soluble)</div>
+    <div class="sc-why">70%+ of Delhi office workers are severely deficient. D3 directly controls testosterone production — deficiency suppresses testosterone by 30–40%. Also controls mood, immunity, bone density, skin quality. K2 routes calcium to bones not arteries. Life-changing within 4 weeks for most people. HealthKart D3+K2.</div>
+    <div class="sc-cost">⏱ Breakfast · ₹200–400/month</div>
+  </div>
+
+  <div class="sc">
+    <div class="sc-top"><div class="sc-nm">Omega-3 (High EPA+DHA)</div><div class="chip ch-or">CORE #4</div></div>
+    <div class="sc-dose">2g EPA+DHA total — 1g breakfast + 1g lunch. Check label for EPA+DHA content.</div>
+    <div class="sc-why">Reduces systemic inflammation (faster recovery), lowers cortisol (directly reduces visceral belly fat — your primary issue), improves skin moisture and texture in 8 weeks, thickens hair, protects heart. The single supplement addressing the most of your targets simultaneously. WOW Life Science Omega-3.</div>
+    <div class="sc-cost">⏱ Breakfast + lunch · ₹500–800/month</div>
+  </div>
+
+  <div class="sc">
+    <div class="sc-top"><div class="sc-nm">Magnesium Glycinate</div><div class="chip ch-bl">SLEEP</div></div>
+    <div class="sc-dose">300mg glycinate form only (not oxide) · 30 min before sleep · Every night</div>
+    <div class="sc-why">Training and stress rapidly deplete magnesium. Deficiency causes poor sleep quality, muscle cramps, brain fog, and anxiety. Glycinate absorbs 4× better than oxide. You will notice deeper sleep within 5–7 days. Deep sleep = growth hormone peak = fat burning + muscle building. This is your most underrated supplement.</div>
+    <div class="sc-cost">⏱ 10PM before sleep · ₹400–600/month</div>
+  </div>
+
+  <div class="sc">
+    <div class="sc-top"><div class="sc-nm">Collagen Peptides + Biotin</div><div class="chip ch-bl">SKIN+HAIR</div></div>
+    <div class="sc-dose">Collagen 10g powder in morning water · Biotin 5,000–10,000mcg with breakfast · Daily</div>
+    <div class="sc-why">Collagen provides skin elasticity and hair strength building blocks. After 25 production drops ~1%/year. Visible skin improvement in 8–12 weeks. Biotin is essential for keratin production — hair thickness, reduced breakage, improved shine. Take both together — synergistic for skin and hair. Oziva Collagen + Wow Skin Science Biotin.</div>
+    <div class="sc-cost">⏱ Morning empty stomach · ₹1,000–1,900/month combined</div>
+  </div>
+
+  <div class="sc">
+    <div class="sc-top"><div class="sc-nm">Zinc Picolinate</div><div class="chip ch-or">CORE #5</div></div>
+    <div class="sc-dose">30mg total — 15mg with lunch + 15mg with dinner. Picolinate form specifically.</div>
+    <div class="sc-why">Most critical mineral for testosterone synthesis in men. Also drives skin healing, hair growth, immune function. Split dosing prevents nausea from high single dose. Do not take with calcium — compete for absorption. Apollo Pharmacy / HealthKart.</div>
+    <div class="sc-cost">⏱ Lunch + dinner · ₹200–350/month</div>
+  </div>
+
+  <div class="lbl">Monthly budget</div>
+  <div class="card" style="font-size:12px;color:var(--sub);line-height:2.2">
+    Whey Isolate: <strong style="color:var(--txt)">₹1,800–2,200</strong><br>
+    Creatine: <strong style="color:var(--txt)">₹400–600</strong><br>
+    D3+K2: <strong style="color:var(--txt)">₹200–400</strong><br>
+    Omega-3: <strong style="color:var(--txt)">₹500–800</strong><br>
+    Magnesium Glycinate: <strong style="color:var(--txt)">₹400–600</strong><br>
+    Collagen + Biotin: <strong style="color:var(--txt)">₹1,000–1,900</strong><br>
+    Zinc Picolinate: <strong style="color:var(--txt)">₹200–350</strong><br>
+    <span style="color:var(--or2);font-family:'JetBrains Mono',monospace;font-size:10px">TOTAL: ₹4,500–6,850/month</span>
+  </div>
+</div>
+
+<!-- ══════ AYURVEDA + MEDICINE ══════ -->
+<div id="pg-ayur" class="pg">
+  <div style="height:10px"></div>
+  <div class="note gn"><b>4 Ayurvedic medicines only</b> — those with genuine clinical evidence for your goals. Everything else removed. 2 safe medicines included. No mood disruption from any of these.</div>
+
+  <div class="lbl">Ayurveda — 4 that genuinely work</div>
+
+  <div class="ay">
+    <div class="ay-nm">Ashwagandha KSM-66</div>
+    <div class="ay-aka">Withania somnifera · 12+ clinical trials</div>
+    <div class="ay-dose">600mg KSM-66 extract · Warm milk at bedtime · Every night</div>
+    <div class="ay-txt">The single most impactful supplement for your situation. RCTs show: cortisol reduced 27–30% (directly shrinks visceral belly fat), testosterone increased 15–17%, muscle mass and strength increased in resistance training studies, sleep quality improved significantly. All four of your primary targets in one herb. Effects build over 8 weeks. NutriJa KSM-66 or Ixoreal KSM-66.</div>
+    <div class="ay-tag">→ Cortisol↓ · Testosterone↑ · Muscle↑ · Sleep↑ · Belly fat↓</div>
+  </div>
+
+  <div class="ay">
+    <div class="ay-nm">Shilajit (Purified Resin)</div>
+    <div class="ay-aka">Mineral pitch · Free testosterone +20% in trials</div>
+    <div class="ay-dose">300mg purified resin · Warm water morning · Resin form only — not powder</div>
+    <div class="ay-txt">Contains 85+ minerals and fulvic acid. Clinical studies show free testosterone increased 20%+, mitochondrial energy production (ATP) improved — more physical energy during training, fatigue reduced. Fulvic acid also increases bioavailability of all supplements you take. Upakarma Pure Shilajit Resin or HiLife — only resin form is genuine.</div>
+    <div class="ay-tag">→ Testosterone↑ · Physical energy↑ · Recovery↑ · Absorption↑</div>
+  </div>
+
+  <div class="ay">
+    <div class="ay-nm">Amla (Indian Gooseberry)</div>
+    <div class="ay-aka">Phyllanthus emblica · 20× Vit C of orange</div>
+    <div class="ay-dose">2 fresh amla daily · OR 1 tsp amla powder in water morning</div>
+    <div class="ay-txt">Most powerful natural antioxidant in Ayurveda. 20× more Vitamin C than an orange. Required for collagen synthesis — directly improves skin brightness, reduces Delhi sun pigmentation, and strengthens hair from within. Supports liver health and immunity. Fresh amla from Delhi markets is far more effective than any capsule. Free and transformative for skin and hair.</div>
+    <div class="ay-tag">→ Skin brightening · Hair strength · Collagen · Immunity · Liver</div>
+  </div>
+
+  <div class="ay">
+    <div class="ay-nm">Triphala</div>
+    <div class="ay-aka">Amalaki + Bibhitaki + Haritaki</div>
+    <div class="ay-dose">1 tsp powder in warm water before bed · OR 2 tablets</div>
+    <div class="ay-txt">Most important Ayurvedic gut formula. Gut health directly controls skin clarity, nutrient absorption from all food and supplements, energy levels, and immunity. Triphala improves absorption of everything else you take — making your supplement stack more effective. Also reduces bloating, improves digestion, and has antioxidant effects on skin clarity.</div>
+    <div class="ay-tag">→ Gut health · Absorption↑ · Skin clarity · Bloating↓ · Immunity</div>
+  </div>
+
+  <div class="lbl">Ayurvedic daily rituals</div>
+  <div class="card" style="font-size:13px;color:var(--sub);line-height:2.3">
+    <span style="color:var(--gn2);font-weight:600">Copper water (Tamra Jal)</span> — store 500ml overnight in copper vessel. Drink first thing on waking. Supports thyroid, digestion, and skin.<br>
+    <span style="color:var(--gn2);font-weight:600">Turmeric + black pepper milk</span> — warm milk at bedtime with pinch of each. Most powerful natural anti-inflammatory. Reduces soreness, improves sleep.<br>
+    <span style="color:var(--gn2);font-weight:600">Anulom Vilom</span> — 10 min alternate nostril breathing after waking. Reduces cortisol, clears mental fog, natural energy boost.<br>
+    <span style="color:var(--gn2);font-weight:600">Bhringraj oil massage</span> — warm oil on scalp 30 min pre-shower, 2× per week. Clinically shown to increase follicle size and reduce hair fall.
+  </div>
+
+  <div class="lbl">Safe medicines (2 only)</div>
+
+  <div class="med">
+    <div class="med-nm">Berberine HCl (500mg)</div>
+    <div class="med-cat">OTC · Natural insulin sensitiser · No prescription</div>
+    <div class="med-dose">500mg with each main meal (1,500mg total daily)</div>
+    <div class="med-why">Activates the same AMPK metabolic pathway as Metformin — improves insulin sensitivity, your body burns more fat and stores less. Directly targets visceral belly fat which is your primary issue. Reduces fasting blood sugar and cholesterol. Available OTC — Himalayan Organics Berberine on Amazon India.</div>
+    <div class="med-safe">✓ OTC plant extract · No prescription · No mood effects · Proven fat loss</div>
+  </div>
+
+  <div class="med">
+    <div class="med-nm">Magnesium Glycinate 300mg</div>
+    <div class="med-cat">OTC · Sleep + recovery · Already in supplement stack</div>
+    <div class="med-dose">300mg at bedtime — listed in supplements but counts as medicine-grade intervention</div>
+    <div class="med-why">At 300mg glycinate form, this is a clinical-grade sleep intervention. Deep sleep produces growth hormone which burns fat and builds muscle. Most people see profound sleep quality improvement within one week. This is the single safest, most effective sleep medicine available without prescription.</div>
+    <div class="med-safe">✓ Non-habit forming · Natural mineral · Positive mood effects from better sleep</div>
+  </div>
+
+  <div class="note yw"><b>Do this first:</b> Get a blood test — TSH + T3/T4 + Vitamin D + Testosterone total. At Dr. Lal Path Labs, ~₹1,500. Subclinical hypothyroidism or severe Vitamin D deficiency makes fat loss nearly impossible regardless of diet and exercise. Rule it out once.</div>
+</div>
+
+<!-- ══════ SKIN + HAIR ══════ -->
+<div id="pg-skin" class="pg">
+  <div style="height:10px"></div>
+  <div class="note bl"><b>Model-grade skin + hair is 70% internal.</b> Your diet, supplements, and Ayurveda fix the 70%. This 10-min daily routine handles the other 30%. Your warm skin tone is an asset — brightening and texture improvement is the goal, not lightening.</div>
+
+  <div class="lbl">Morning — 5 minutes</div>
+  <div class="card">
+    <div class="sk">
+      <div class="sk-n">1</div>
+      <div><div class="sk-a">Cleanse</div><div class="sk-p">Cetaphil Gentle · OR Minimalist 2% Salicylic (oily/acne-prone)</div><div class="sk-w">Removes overnight sebum. Salicylic version unclogs pores. Use the gentler one if skin is not oily.</div></div>
+    </div>
+    <div class="sk">
+      <div class="sk-n">2</div>
+      <div><div class="sk-a">Vitamin C Serum</div><div class="sk-p">Minimalist 10% Vit C · 2–3 drops on slightly damp skin</div><div class="sk-w">Your daily armour against Delhi's severe air pollution. Brightens, evens tone, fights oxidative damage from PM2.5 exposure. Apply on damp skin for better penetration.</div></div>
+    </div>
+    <div class="sk">
+      <div class="sk-n">3</div>
+      <div><div class="sk-a">Moisturise</div><div class="sk-p">Neutrogena Hydro Boost Water Gel · OR CeraVe Moisturising Cream</div><div class="sk-w">Gel texture works in Delhi humidity. Repairs skin barrier. Non-greasy, non-comedogenic. Non-negotiable step.</div></div>
+    </div>
+    <div class="sk">
+      <div class="sk-n">4</div>
+      <div><div class="sk-a">Sunscreen — every single day</div><div class="sk-p">Re'equil Ultra Matte SPF 50 PA++++</div><div class="sk-w">Delhi UV is among Asia's highest year-round. Prevents hyperpigmentation (Indian skin is highly prone), dark spots, and premature aging. Apply even indoors near windows. Highest ROI skincare product you can buy.</div></div>
+    </div>
+  </div>
+
+  <div class="lbl">Night — 5 minutes</div>
+  <div class="card">
+    <div class="sk">
+      <div class="sk-n">1</div>
+      <div><div class="sk-a">Double cleanse post-gym</div><div class="sk-p">Same face wash — 2 full rounds after every gym session</div><div class="sk-w">Sweat + Delhi PM2.5 pollution on skin for 20+ minutes = guaranteed breakouts. Non-negotiable. Never skip this even once.</div></div>
+    </div>
+    <div class="sk">
+      <div class="sk-n">2</div>
+      <div><div class="sk-a">Retinol (from Week 5 of routine)</div><div class="sk-p">Minimalist 0.2% Retinol · Alternate nights only · Upgrade to 0.6% after 8 weeks</div><div class="sk-w">Gold standard active ingredient for skin texture transformation, pore reduction, and anti-aging. Initial purging weeks 2–3 is normal — push through. Dramatic results visible at 12 weeks. Use only at night, never same night as Vitamin C.</div></div>
+    </div>
+    <div class="sk">
+      <div class="sk-n">3</div>
+      <div><div class="sk-a">Niacinamide 10% (non-retinol nights)</div><div class="sk-p">The Ordinary OR Minimalist Niacinamide 10% + Zinc</div><div class="sk-w">Alternate nights with retinol. Minimises pores, evens skin tone, controls oiliness, reduces dark spots. For Indian skin specifically this is the fastest route to bright, model-quality complexion.</div></div>
+    </div>
+    <div class="sk">
+      <div class="sk-n">4</div>
+      <div><div class="sk-a">Night moisturiser + lips</div><div class="sk-p">CeraVe PM Moisturising Lotion · Vaseline on lips</div><div class="sk-w">Richer formula supports overnight skin repair cycle. Delhi AC + winter air destroys lip moisture without daily protection.</div></div>
+    </div>
+  </div>
+
+  <div class="lbl">Hair routine</div>
+  <div class="card">
+    <div class="sk">
+      <div class="sk-n">1</div>
+      <div><div class="sk-a">Bhringraj oil scalp massage</div><div class="sk-p">Kesh King OR Mahaabhringraj warm oil · 2× per week · 30 min before shower</div><div class="sk-w">5-min fingertip massage increases scalp blood flow 50%. Clinically shown to increase follicle size and reduce hair fall. The single most impactful hair habit. Consistent for 3+ months produces dramatic density improvement.</div></div>
+    </div>
+    <div class="sk">
+      <div class="sk-n">2</div>
+      <div><div class="sk-a">Sulfate-free shampoo</div><div class="sk-p">WOW Apple Cider Vinegar Shampoo · 2–3× per week max</div><div class="sk-w">Overwashing strips scalp oils. Sulfate-free prevents dryness. Conditioner on lengths only — never scalp. Leave conditioner 2 minutes before rinsing.</div></div>
+    </div>
+    <div class="sk">
+      <div class="sk-n">3</div>
+      <div><div class="sk-a">Cold water final rinse</div><div class="sk-p">Last 30 seconds of shower — cold water on hair only</div><div class="sk-w">Closes the hair cuticle — instantly increases shine and reduces frizz. Immediate visible result from the very first time. Zero cost, 30 seconds.</div></div>
+    </div>
+    <div class="sk">
+      <div class="sk-n">4</div>
+      <div><div class="sk-a">Weekly protein hair mask</div><div class="sk-p">1 egg + 1 tbsp curd + 1 tbsp aloe vera gel · 20 min · Once weekly</div><div class="sk-w">Egg provides protein and biotin topically. Curd conditions. Aloe repairs scalp and reduces dandruff. Free, deeply nourishing, combats Delhi hard water and pollution damage.</div></div>
+    </div>
+  </div>
+
+  <div class="lbl">Delhi-specific alerts</div>
+  <div class="note or">Wash face <strong>immediately</strong> after every gym session. Sweat + Delhi PM2.5 on skin = breakouts within 24 hrs guaranteed.</div>
+  <div class="note gn">Room humidifier October–February. Delhi winter drops to 30% humidity. Destroys skin overnight. Hair static and breakage. A ₹2,000 humidifier is transformative.</div>
+  <div class="note bl">Vitamin C shower filter head (₹1,500–2,500). Delhi hard water coats hair making it dull and brittle. Visible improvement in 4 weeks of installation.</div>
+  <div class="note yw">Satin pillowcase (₹300–500). Cotton friction during sleep causes hair breakage and skin creasing. Swap it — immediate improvement from night one.</div>
+</div>
+
+<!-- ══════ SCHEDULE ══════ -->
+<div id="pg-sched" class="pg">
+  <div style="height:10px"></div>
+  <div class="note bl"><b>Built around your 9AM–7PM job.</b> Gym at 6AM is the only slot no meeting can steal. The schedule is designed so every hour serves your transformation — training, nutrition timing, recovery, and sleep are all optimised.</div>
+
+  <div class="lbl">Training day schedule (Mon/Tue/Thu/Fri)</div>
+  <div class="card">
+    <div class="sr"><div class="sr-t">5:30 AM</div><div><div class="sr-l">Wake + copper water</div><div class="sr-d">No snooze. 500ml copper-stored water. 5 min Anulom Vilom. Oil pull while coffee brews (10 min).</div><span class="sr-b" style="background:var(--ord);color:var(--or2)">Non-negotiable</span></div></div>
+    <div class="sr"><div class="sr-t">5:45 AM</div><div><div class="sr-l">Pre-gym fuel + supps</div><div class="sr-d">½ banana + 5 almonds. Creatine 5g in water. L-Theanine 100mg + black coffee. Shilajit 300mg in warm water.</div></div></div>
+    <div class="sr"><div class="sr-t">6:00 AM</div><div><div class="sr-l">GYM — Compound session</div><div class="sr-d">5 min warm-up → 4–5 compound exercises → 5 min stretch. Log every weight in phone notes. 55–65 min total.</div><span class="sr-b" style="background:var(--ord);color:var(--or2)">Core block</span></div></div>
+    <div class="sr"><div class="sr-t">7:05 AM</div><div><div class="sr-l">Whey isolate immediately</div><div class="sr-d">1 scoop whey in cold water within 20 min of last set. Do not skip this window.</div></div></div>
+    <div class="sr"><div class="sr-t">7:15 AM</div><div><div class="sr-l">Shower + skin routine</div><div class="sr-d">Lukewarm shower. Double cleanse face. Morning skin routine on damp skin. Cold rinse on hair last. On oil nights: shampoo this morning.</div></div></div>
+    <div class="sr"><div class="sr-t">8:00 AM</div><div><div class="sr-l">Breakfast + morning supps</div><div class="sr-d">Eggs + paratha + milk + amla. Take D3+K2, Omega-3 1g, B-Complex, Collagen 10g + Biotin with this meal.</div><span class="sr-b" style="background:var(--gnd);color:var(--gn2)">Biggest meal</span></div></div>
+    <div class="sr"><div class="sr-t">9:00 AM</div><div><div class="sr-l">Work — 1L water on desk</div><div class="sr-d">Refill 3× minimum. Set hourly phone reminder. Dehydration reduces cognition 20% and worsens skin and energy.</div></div></div>
+    <div class="sr"><div class="sr-t">1:00 PM</div><div><div class="sr-l">Lunch — away from desk</div><div class="sr-d">Dal + 2 rotis + sabzi + curd + large salad. NO rice. Omega-3 1g + Zinc 15mg with this meal. Eat slowly. Step away from screen.</div><span class="sr-b" style="background:var(--rdd);color:var(--rd2)">No rice ever</span></div></div>
+    <div class="sr"><div class="sr-t">1:30 PM</div><div><div class="sr-l">10 min post-lunch walk</div><div class="sr-d">Walk around office or building. Reduces blood sugar spike 30%, eliminates post-lunch drowsiness. Most effective free anti-crash hack.</div><span class="sr-b" style="background:var(--gnd);color:var(--gn2)">Anti-crash</span></div></div>
+    <div class="sr"><div class="sr-t">4:00 PM</div><div><div class="sr-l">Protein snack + focus</div><div class="sr-d">Whey or 2 boiled eggs + black coffee. L-Theanine with coffee. No caffeine after 5PM — impacts sleep.</div><span class="sr-b" style="background:var(--bld);color:var(--bl2)">Energy</span></div></div>
+    <div class="sr"><div class="sr-t">7:00 PM</div><div><div class="sr-l">Work ends — walk</div><div class="sr-d">Walk to metro/auto instead of cab. Take stairs always. Burns 200–300 extra kcal/day without feeling like exercise.</div></div></div>
+    <div class="sr"><div class="sr-t">8:00 PM</div><div><div class="sr-l">Dinner + Zinc 15mg</div><div class="sr-d">Chicken/fish/paneer + 1 roti + large salad + sabzi. No rice. Take Zinc 15mg second dose with dinner.</div><span class="sr-b" style="background:var(--gnd);color:var(--gn2)">High protein</span></div></div>
+    <div class="sr"><div class="sr-t">9:00 PM</div><div><div class="sr-l">Night skin routine</div><div class="sr-d">Double cleanse → Retinol or Niacinamide (alternating) → moisturiser → lips. Bhringraj oil on scalp (Tue+Thu nights). No screens after 9:30PM.</div></div></div>
+    <div class="sr"><div class="sr-t">10:00 PM</div><div><div class="sr-l">Sleep stack + casein</div><div class="sr-d">Dahi or warm turmeric milk. Ashwagandha 600mg + Magnesium 300mg + Triphala 1 tsp + Berberine 500mg.</div></div></div>
+    <div class="sr"><div class="sr-t">10:30 PM</div><div><div class="sr-l">SLEEP</div><div class="sr-d">7.5–8 hrs. Growth hormone peaks here. Fat burns here. Muscle builds here. Dark room, cool temperature, no phone.</div><span class="sr-b" style="background:var(--ord);color:var(--or2)">Growth happens here</span></div></div>
+  </div>
+
+  <div class="lbl">Wednesday (mid-week rest)</div>
+  <div class="note bl">Full rest from weights. Normal strict diet — no cheat. 20-min walk. Extra sleep if possible. Meal prep for the week. Log and review workout progress from Mon+Tue.</div>
+
+  <div class="lbl">Milestone tracker</div>
+  <div class="ms"><div class="ms-mo">MONTH 1</div><div class="ms-b"><strong>Face visibly leaner.</strong> Energy up significantly. Clothes looser. 2–3 kg lost. Gym forms locked in. Skin cleaner from routine. Sleep dramatically improved from Magnesium.</div></div>
+  <div class="ms"><div class="ms-mo">MONTH 2–3</div><div class="ms-b"><strong>Belly clearly reducing.</strong> 5–7 kg total fat lost. Jawline sharp. Shoulder and chest muscle appearing. Skin tone brightening from Vit C + Omega-3. Ashwagandha effects fully active.</div></div>
+  <div class="ms"><div class="ms-mo">MONTH 4–5</div><div class="ms-b"><strong>Muscle definition visible</strong> in shoulders, arms, chest. Upper abs outline. Back starting to show V-shape. Retinol skin texture results striking. Hair noticeably thicker and shinier from Biotin + Bhringraj.</div></div>
+  <div class="ms"><div class="ms-mo">MONTH 6</div><div class="ms-b"><strong>Strong V-taper. Full ab outline.</strong> Leaner than any point in your life. 76 kg landmark approaching. People repeatedly comment. All Week-8 gym benchmarks met or exceeded.</div></div>
+  <div class="ms"><div class="ms-mo">MONTH 8–10</div><div class="ms-b"><strong>Target physique achieved.</strong> 76 kg lean with visible abs. Vascular arms. Extraordinary skin texture tight over muscle. Model-grade hair density and shine. The transformation is complete.</div></div>
+</div>
+
+</div><!-- end content -->
+
+<!-- BOTTOM NAV -->
+<div id="bnav">
+  <button class="ni active" onclick="showPage('home',this)"><div class="ni-ico">🏠</div><div class="ni-lbl">Home</div></button>
+  <button class="ni" onclick="showPage('workout',this)"><div class="ni-ico">🏋️</div><div class="ni-lbl">Workout</div></button>
+  <button class="ni" onclick="showPage('diet',this)"><div class="ni-ico">🥗</div><div class="ni-lbl">Diet</div></button>
+  <button class="ni" onclick="showPage('supps',this)"><div class="ni-ico">💊</div><div class="ni-lbl">Supps</div></button>
+  <button class="ni" onclick="showPage('ayur',this)"><div class="ni-ico">🌿</div><div class="ni-lbl">Ayurveda</div></button>
+  <button class="ni" onclick="showPage('skin',this)"><div class="ni-ico">✨</div><div class="ni-lbl">Skin</div></button>
+  <button class="ni" onclick="showPage('sched',this)"><div class="ni-ico">📅</div><div class="ni-lbl">Schedule</div></button>
+</div>
+
+<!-- INSTALL BANNER -->
+<div id="ibanner">
+  <div class="ib-ico">📲</div>
+  <div class="ib-t"><strong>Install as iPhone App</strong><span>Tap Share → "Add to Home Screen" → Add</span></div>
+  <button class="ib-x" onclick="this.closest('#ibanner').style.display='none'">✕</button>
+</div>
+
+</div><!-- end app -->
+
+<script>
+// ═══ WORKOUT DATA ═══
+const wdays={
+  mon:{lbl:'Monday — Full Body A',col:'var(--or)',
+    note:'Full Body A — every major muscle group. Goal: beat last session by 2.5 kg or 1 rep on at least 2 lifts. Tap any exercise to see form cues.',
+    ex:[
+      {n:'Barbell Back Squat',chip:'COMPOUND',t:'or',sets:'4 × 6–8 reps · Rest 3 min',
+       fm:'Bar on upper traps. Feet shoulder-width, toes 15° out. Chest tall, brace core hard. Break parallel — hip crease below knee. Drive knees out over toes. Never let knees cave inward.',
+       wy:'Highest hormonal response of any exercise. Trains quads, glutes, hamstrings, and core simultaneously. Foundation of your physique.'},
+      {n:'Barbell Deadlift',chip:'COMPOUND',t:'or',sets:'3 × 5 reps · Rest 3 min',
+       fm:'Bar directly over mid-foot. Grip just outside shins. Chest up, lats engaged. Push the floor away. Bar stays dragging up the legs. Lock hips and knees simultaneously at top.',
+       wy:'Most complete movement. Trains entire posterior chain. Releases maximum growth hormone. Low rep, high weight = maximum stimulus.'},
+      {n:'Barbell Bench Press',chip:'COMPOUND',t:'or',sets:'4 × 8–10 reps · Rest 2 min',
+       fm:'Shoulder blades pinched together and pulled down. Bar to mid-chest. Elbows at 45°. 3-second controlled descent, explosive press. Safety pins or spotter essential.',
+       wy:'Primary chest, shoulder and tricep builder. The chest width in your target photos requires consistent progressive bench pressing over months.'},
+      {n:'Barbell Bent-Over Row',chip:'COMPOUND',t:'or',sets:'4 × 8–10 reps · Rest 90 sec',
+       fm:'Hinge at hips, back 45°, soft knees. Pull bar to belly button explosively. Elbows drive back. Lower slowly with control. Keep lower back neutral throughout.',
+       wy:'Builds back thickness and width. The wide back in your target photos requires heavy rowing twice per week. Balances pressing to prevent posture problems.'},
+      {n:'Plank Hold',chip:'CORE',t:'s3',sets:'3 × 45–60 sec · Rest 45 sec',
+       fm:'Elbows under shoulders. Straight line head to heels. Squeeze glutes, brace core hard. Do NOT let hips sag or pike. Breathe normally.',
+       wy:'Core stability protects your spine during heavy squats and deadlifts. A weak core limits all compound lifts before the target muscles do.'},
+    ]},
+  tue:{lbl:'Tuesday — Full Body B',col:'var(--bl)',
+    note:'Full Body B — same muscle groups, different movement patterns. Overhead press builds the shoulder width. Pull-ups build the lat width. Both are critical for your target V-taper physique.',
+    ex:[
+      {n:'Barbell Back Squat',chip:'COMPOUND',t:'or',sets:'4 × 6–8 reps · Rest 3 min',
+       fm:'Identical form to Monday. Add 2.5 kg if Monday\'s form was solid. Squatting 5× per week is how beginners build strength fastest.',
+       wy:'High frequency squatting twice per week produces significantly more strength gain than once per week. Each session builds on the last.'},
+      {n:'Overhead Press (OHP)',chip:'COMPOUND',t:'or',sets:'4 × 8–10 reps · Rest 2 min',
+       fm:'Bar from front rack at collar bone. Press straight up — head moves through the window at top. Glutes and core locked. No lower back arch at all.',
+       wy:'Builds shoulder caps that create the V-taper. The shoulder width in your target photos primarily comes from consistent OHP progression.'},
+      {n:'Pull-ups / Lat Pulldown',chip:'COMPOUND',t:'or',sets:'4 × max (or 10–12) · Rest 2 min',
+       fm:'Full dead hang. Pull until chin clears bar. No kipping or swinging. Use assisted machine until 5 unassisted. Lat pulldown: pull to upper chest, squeeze lats at bottom.',
+       wy:'Best exercise for lat width — the V-shape that makes waist look narrower. Track rep count every session. Rising numbers = growing back.'},
+      {n:'Romanian Deadlift (RDL)',chip:'COMPOUND',t:'or',sets:'3 × 10 reps · Rest 90 sec',
+       fm:'Soft knee bend, hinge at hips. Lower to mid-shin feeling full hamstring stretch. No rounding of lower back. Slow 4-count descent.',
+       wy:'Hamstring and glute development. Prevents the knee injuries and lower back problems that end training careers prematurely.'},
+      {n:'Face Pulls (Cable)',chip:'ACCESSORY',t:'s3',sets:'3 × 15 reps · Rest 60 sec',
+       fm:'High cable, rope attachment. Pull to face level, elbows high. External rotate at peak. Light weight — feel rear delts contracting.',
+       wy:'Essential shoulder joint health. Prevents the impingement from heavy pressing that is the most common beginner training injury.'},
+    ]},
+  thu:{lbl:'Thursday — Full Body A',col:'var(--or)',
+    note:'Same as Monday. Beat Monday\'s numbers on at least 2 lifts. This is progressive overload — the mechanism behind every physique transformation.',
+    ex:[
+      {n:'Barbell Back Squat',chip:'COMPOUND',t:'or',sets:'4 × 6–8 reps · Rest 3 min',
+       fm:'Attempt 2.5 kg more than Monday if form was solid. Form always before weight. Record your best set.',
+       wy:'Thursday squat is often your strongest — neural adaptation from Mon+Tue has fully processed. Ride this adaptation.'},
+      {n:'Barbell Deadlift',chip:'COMPOUND',t:'or',sets:'3 × 5 reps · Rest 3 min',
+       fm:'Add 2.5–5 kg from Monday if form was perfect. Never increase load when form breaks.',
+       wy:'Low rep heavy deadlifts produce maximum hormonal response — critical for maintaining muscle mass during your cutting phase.'},
+      {n:'Barbell Bench Press',chip:'COMPOUND',t:'or',sets:'4 × 8–10 reps · Rest 2 min',
+       fm:'Attempt 2.5 kg more than Monday or 1–2 additional reps at the same weight. Record best set.',
+       wy:'Pressing frequency twice per week is the fastest way to build the chest appearance in your reference physique photos.'},
+      {n:'Barbell Bent-Over Row',chip:'COMPOUND',t:'or',sets:'4 × 8–10 reps · Rest 90 sec',
+       fm:'Beat Monday\'s performance. Every 2.5 kg added here builds visible back thickness over weeks.',
+       wy:'The wide, thick back in your target photos requires months of consistent heavy rowing. This is the work.'},
+      {n:'Plank Hold',chip:'CORE',t:'s3',sets:'3 × 45–60 sec · Rest 45 sec',
+       fm:'Hold 5 seconds longer than Monday. Track your personal best every week.',
+       wy:'Core endurance compounds into heavier squats and deadlifts over time. Every second you hold builds this foundation.'},
+    ]},
+  fri:{lbl:'Friday — Full Body B',col:'var(--bl)',
+    note:'Final heavy session before the weekend. Push for personal bests — you have Saturday (lighter) and Sunday (full rest) coming. Your strongest session of the week.',
+    ex:[
+      {n:'Barbell Back Squat',chip:'COMPOUND',t:'or',sets:'4 × 6–8 reps · Rest 3 min',
+       fm:'Compare to Tuesday. Attempt to beat it. Record your heaviest set this week.',
+       wy:'By Week 2 most beginners are 10–15% stronger than Day 1 from neural adaptation alone — before any muscle is even built. Visible muscle starts Week 3–6.'},
+      {n:'Overhead Press (OHP)',chip:'COMPOUND',t:'or',sets:'4 × 8–10 reps · Rest 2 min',
+       fm:'OHP progresses slower than other lifts. Even 1 extra rep is meaningful progress on this movement.',
+       wy:'Shoulder width is the most visible transformation marker. People notice this first. Be patient with OHP — it pays off enormously.'},
+      {n:'Pull-ups / Lat Pulldown',chip:'COMPOUND',t:'or',sets:'4 × max (or 10–12) · Rest 2 min',
+       fm:'Log max rep count. One more rep than Tuesday is a genuine win. Target: 8–10 unassisted by Week 8.',
+       wy:'When you can do 10 clean pull-ups, your lats are growing significantly. This is the clearest visible indicator of back development.'},
+      {n:'Romanian Deadlift (RDL)',chip:'COMPOUND',t:'or',sets:'3 × 10 reps · Rest 90 sec',
+       fm:'4-second controlled descent. The slow eccentric is where most muscle damage and growth stimulus occurs.',
+       wy:'Consistent hamstring training prevents pulled hamstrings — the most common beginner injury that stops training for 4–6 weeks.'},
+      {n:'Face Pulls (Cable)',chip:'ACCESSORY',t:'s3',sets:'3 × 15 reps · Rest 60 sec',
+       fm:'Final session of the week. Light weight, perfect form. Feel the rear delt contracting.',
+       wy:'Shoulder health insurance. Prevention is infinitely better than managing a shoulder injury.'},
+    ]},
+  sat:{lbl:'Saturday — Arms + Abs',col:'var(--gn)',
+    note:'Reward session — arms and abs. Lighter, enjoyable, produces the show muscles. Keep rest periods 45–60 sec for maximum pump. Log weights — progress here too.',
+    ex:[
+      {n:'Barbell Bicep Curl',chip:'BICEPS',t:'gn',sets:'4 × 10–12 reps · Rest 60 sec',
+       fm:'Strict form — no swing, no momentum. 3-second controlled negative. Elbows pinned at sides. Full range every rep.',
+       wy:'Primary bicep mass builder. Thick arms in your reference photos require consistent strict curling with progressive weight over months.'},
+      {n:'Tricep Pushdowns (Rope)',chip:'TRICEPS',t:'gn',sets:'4 × 12–15 reps · Rest 60 sec',
+       fm:'Elbows pinned at sides — never let them move forward. Spread rope fully at bottom. 1-second hold. Slow return.',
+       wy:'Triceps = 2/3 of arm size. The horseshoe arm definition in your target photos is primarily triceps development, not biceps.'},
+      {n:'Hammer Curl (Dumbbell)',chip:'BICEPS',t:'gn',sets:'3 × 12 reps · Rest 60 sec',
+       fm:'Neutral grip (thumbs up). Same strict form. Alternate arms. Full range of motion.',
+       wy:'Builds the brachialis under the bicep that pushes it up — makes arms look thicker from every angle.'},
+      {n:'Cable Crunches (Kneeling)',chip:'ABS',t:'gn',sets:'4 × 15–20 reps · Rest 45 sec',
+       fm:'Kneel facing cable, rope at top. Pull down contracting abs — not just moving weight. Full contraction at bottom, full stretch at top.',
+       wy:'Weighted ab work is required to build visible six-pack abs. Bodyweight crunches cannot create the muscular abs in your target photos.'},
+      {n:'Hanging Leg Raises',chip:'ABS',t:'gn',sets:'3 × 12 reps · Rest 45 sec',
+       fm:'Hang from pull-up bar. Raise legs to horizontal or higher. Slow controlled descent. No swinging.',
+       wy:'Lower ab builder. Complete six-pack requires this movement for the lower portion that most people never achieve.'},
+    ]},
+};
+
+// ═══ DIET DATA — ALL 7 DAYS ═══
+const dietDays={
+  mon:{lbl:'Monday — Training Day',type:'train',
+    note:'Training day diet. Carbs are timed — pre-gym and with breakfast only. Dinner is zero-carb. Total: ~1,950 kcal · 192g protein · 125g carbs · 74g fat.',
+    meals:[
+      {dot:'',t:'6:00 AM · PRE-GYM',nm:'Pre-Workout Fuel',
+       f:'<strong>½ banana</strong> (medium) + <strong>5 soaked almonds</strong> + 300ml warm water with lemon + pinch of black salt',
+       tags:[{c:'to',l:'~100 kcal'},{c:'tg',l:'15g carbs'},{c:'tg',l:'3g protein'}],
+       note:'Small fast fuel. Prevents muscle breakdown during training without causing digestive discomfort.'},
+      {dot:'gn',t:'8:15 AM · BREAKFAST',nm:'High-Protein Post-Gym Breakfast',
+       f:'<strong>3 whole eggs + 3 egg whites</strong> scrambled in 1 tsp olive oil · <strong>1 whole-wheat paratha</strong> (dry, no butter) · <strong>1 glass toned milk</strong> (250ml) · <strong>1 fresh amla</strong> + Collagen 10g in a separate glass of warm water',
+       tags:[{c:'to',l:'~480 kcal'},{c:'tg',l:'48g protein'},{c:'ty',l:'38g carbs'},{c:'tb',l:'No sugar'}],
+       note:'Post-gym anabolic window. Highest protein meal of the day. One paratha only — this is the day\'s carb budget for starch. All morning supplements with this meal.'},
+      {dot:'bl',t:'1:00 PM · LUNCH',nm:'Protein-Led Lunch — No Crash',
+       f:'<strong>1 cup cooked moong dal</strong> (protein-richest dal — rotate to masoor Thu, chana Sat) · <strong>2 rotis</strong> whole wheat — exactly 2, no more · <strong>1 sabzi</strong> any vegetable, 1 tsp oil max · <strong>1 cup low-fat curd</strong> · <strong>Large salad:</strong> cucumber + tomato + carrot + onion + lemon juice · <em>Optional: 2 boiled eggs on side for +14g protein</em>',
+       tags:[{c:'to',l:'~490 kcal'},{c:'tg',l:'36g protein'},{c:'tr',l:'NO rice'},{c:'tg',l:'High fibre'}],
+       note:'2 rotis strictly — not 3 or 4. No rice. The large salad and curd slow glucose absorption eliminating post-lunch drowsiness. Walk 10 minutes after.'},
+      {dot:'',t:'4:00 PM · SNACK',nm:'Anti-Slump Protein',
+       f:'<strong>1 scoop whey isolate</strong> in cold water (best) · OR <strong>2 boiled eggs + roasted chana</strong> (handful, unsalted) · 1 black coffee or green tea (no sugar)',
+       tags:[{c:'to',l:'~200 kcal'},{c:'tg',l:'25–30g protein'},{c:'tb',l:'Focus boost'},{c:'tr',l:'No sugar'}],
+       note:'Catches the 4 PM blood sugar dip before it becomes a crash. Black coffee without sugar gives 45 min of clean alertness.'},
+      {dot:'yw',t:'8:00 PM · DINNER',nm:'Zero-Carb Lean Protein Dinner',
+       f:'<strong>180g grilled chicken breast</strong> (marinate with garlic, herbs, lemon — grill or bake only) · <strong>Large salad:</strong> full bowl cucumber + tomato + onion + spinach leaves + lemon + 1 tsp olive oil · <strong>1 sabzi</strong> any vegetable (light oil) · <em>NO roti. NO rice. Zero starch at dinner.</em>',
+       tags:[{c:'to',l:'~380 kcal'},{c:'tg',l:'52g protein'},{c:'tr',l:'Zero carbs'},{c:'tg',l:'High volume'}],
+       note:'After 7PM you are sedentary — your body needs protein, not carbohydrates. Zero starch at dinner accelerates fat loss significantly. Large salad provides volume and fibre for satiety.'},
+      {dot:'dm',t:'10:00 PM · OPTIONAL',nm:'Casein Wind-Down',
+       f:'<strong>1 cup low-fat dahi</strong> (plain) · OR <strong>warm toned milk</strong> + pinch turmeric + pinch black pepper · Ashwagandha + Magnesium with this',
+       tags:[{c:'to',l:'~130 kcal'},{c:'tg',l:'10g protein'},{c:'tg',l:'Optional'}],
+       note:'Casein digests over 7 hrs — feeds muscles through the night. Turmeric reduces soreness and improves sleep depth.'},
+    ]},
+  tue:{lbl:'Tuesday — Training Day',type:'train',
+    note:'Training day. Same structure as Monday with protein rotations. Total: ~1,950 kcal · 190g protein · 122g carbs · 76g fat.',
+    meals:[
+      {dot:'',t:'6:00 AM · PRE-GYM',nm:'Pre-Workout Fuel',
+       f:'<strong>½ banana</strong> + <strong>5 almonds</strong> + warm lemon water',
+       tags:[{c:'to',l:'~100 kcal'},{c:'tg',l:'15g carbs'}],note:''},
+      {dot:'gn',t:'8:15 AM · BREAKFAST',nm:'Post-Gym Egg + Fish Breakfast',
+       f:'<strong>2 whole eggs + 2 egg whites</strong> scrambled · <strong>100g grilled fish</strong> (rohu or any white fish, morning prep) · <strong>1 multigrain bread slice</strong> (toasted) · <strong>1 glass toned milk</strong> · <strong>1 amla</strong>',
+       tags:[{c:'to',l:'~460 kcal'},{c:'tg',l:'52g protein'},{c:'ty',l:'28g carbs'}],
+       note:'Fish at breakfast on Tuesday is ideal — omega-3 rich proteins early. One slice multigrain bread keeps carbs minimal.'},
+      {dot:'bl',t:'1:00 PM · LUNCH',nm:'Masoor Dal + Paneer Lunch',
+       f:'<strong>1 cup masoor dal</strong> (high iron + protein) · <strong>50g paneer tikka</strong> (grilled dry, extra protein) · <strong>2 whole wheat rotis</strong> · <strong>1 cup curd</strong> · <strong>Large salad</strong> · <strong>1 sabzi</strong>',
+       tags:[{c:'to',l:'~510 kcal'},{c:'tg',l:'42g protein'},{c:'tr',l:'NO rice'}],
+       note:'Adding 50g dry paneer to Tuesday lunch easily adds 12g protein. Masoor dal has the best amino acid profile of all lentils.'},
+      {dot:'',t:'4:00 PM · SNACK',nm:'Whey + Walnuts',
+       f:'<strong>1 scoop whey isolate</strong> in cold water · <strong>10 walnuts</strong> · 1 black coffee',
+       tags:[{c:'to',l:'~230 kcal'},{c:'tg',l:'28g protein'},{c:'tb',l:'Omega-3'}],
+       note:'Walnuts provide omega-3 fats that feed the brain and reduce cortisol. Best anti-drowsiness nut.'},
+      {dot:'yw',t:'8:00 PM · DINNER',nm:'Grilled Fish Dinner',
+       f:'<strong>160g grilled surmai / rohu / pomfret</strong> (marinate with turmeric + lemon + garlic) · <strong>Stir-fried spinach</strong> (palak) with garlic · <strong>Large salad</strong> + <strong>1 cup dahi</strong> · <em>NO roti. NO rice.</em>',
+       tags:[{c:'to',l:'~370 kcal'},{c:'tg',l:'50g protein'},{c:'tr',l:'Zero carbs'},{c:'tg',l:'Heart + Skin'}],
+       note:'Fish 3×/week is the single best food for skin texture, hair quality, and heart health simultaneously. Grilling with turmeric has anti-inflammatory benefits.'},
+      {dot:'dm',t:'10:00 PM · OPTIONAL',nm:'Casein Wind-Down',
+       f:'<strong>1 cup low-fat dahi</strong> + Ashwagandha + Magnesium',
+       tags:[{c:'to',l:'~130 kcal'},{c:'tg',l:'10g protein'}],note:''},
+    ]},
+  wed:{lbl:'Wednesday — Rest Day',type:'rest',
+    note:'Rest day diet. Carbs reduced further — no training means no carb timing needed. Protein stays high at 185g. Total: ~1,700 kcal · 185g protein · 85g carbs · 68g fat. Slightly lower calories on rest day accelerates fat loss.',
+    meals:[
+      {dot:'',t:'7:30 AM · BREAKFAST',nm:'Rest Day High-Protein Breakfast',
+       f:'<strong>4 whole eggs + 2 egg whites</strong> scrambled in 1 tsp olive oil · <strong>2 slices multigrain bread</strong> (toasted) · <strong>1 glass toned milk</strong> · <strong>1 amla</strong> · Collagen 10g in warm water',
+       tags:[{c:'to',l:'~480 kcal'},{c:'tg',l:'52g protein'},{c:'ty',l:'30g carbs'}],
+       note:'No gym, so slightly later wake time. Eggs + bread for carb source. Higher egg count since no whey post-gym today.'},
+      {dot:'bl',t:'1:00 PM · LUNCH',nm:'Chana Dal + Chicken Lunch',
+       f:'<strong>1 cup chana dal</strong> (highest fibre dal) · <strong>100g grilled chicken breast</strong> (add on side for protein boost) · <strong>2 rotis</strong> whole wheat · <strong>1 cup curd</strong> · <strong>Large salad</strong> · <strong>1 sabzi</strong>',
+       tags:[{c:'to',l:'~530 kcal'},{c:'tg',l:'55g protein'},{c:'tr',l:'NO rice'}],
+       note:'On rest days, adding chicken to lunch easily fills the protein gap from no whey post-gym. Chana dal has the highest fibre content — keeps you full the longest.'},
+      {dot:'',t:'4:00 PM · SNACK',nm:'Rest Day Protein Snack',
+       f:'<strong>1 scoop whey isolate</strong> in cold water · <strong>1 apple</strong> · 1 green tea',
+       tags:[{c:'to',l:'~200 kcal'},{c:'tg',l:'28g protein'}],
+       note:'On rest days, this 4PM whey replaces the post-gym dose. Apple provides fibre and antioxidants.'},
+      {dot:'yw',t:'8:00 PM · DINNER',nm:'Paneer Bhurji Dinner — No Carbs',
+       f:'<strong>200g paneer bhurji</strong> (2 tsp oil, no cream — with onion, tomato, capsicum, spices) · <strong>Stir-fried vegetables</strong> (broccoli, beans, or mixed veg) · <strong>Large salad</strong> · <em>NO roti. NO rice.</em>',
+       tags:[{c:'to',l:'~380 kcal'},{c:'tg',l:'40g protein'},{c:'tr',l:'Zero carbs'}],
+       note:'Wednesday rest day dinner is vegetarian paneer — balanced with high protein. No starch. Large vegetable volume for satiety and micronutrients.'},
+      {dot:'dm',t:'10:00 PM · OPTIONAL',nm:'Casein Wind-Down',
+       f:'<strong>Warm turmeric milk</strong> (toned, no sugar) + Ashwagandha + Magnesium + Triphala',
+       tags:[{c:'to',l:'~130 kcal'},{c:'tg',l:'8g protein'}],note:'Extra important on rest day — Triphala improves nutrient absorption from your entire day\'s food.'},
+    ]},
+  thu:{lbl:'Thursday — Training Day',type:'train',
+    note:'Training day. Same structure as Monday/Tuesday. Protein rotated. Total: ~1,950 kcal · 190g protein · 120g carbs · 75g fat.',
+    meals:[
+      {dot:'',t:'6:00 AM · PRE-GYM',nm:'Pre-Workout Fuel',
+       f:'<strong>½ banana</strong> + <strong>5 almonds</strong> + warm lemon water',
+       tags:[{c:'to',l:'~100 kcal'},{c:'tg',l:'15g carbs'}],note:''},
+      {dot:'gn',t:'8:15 AM · BREAKFAST',nm:'Egg White Omelette Breakfast',
+       f:'<strong>2 whole eggs + 4 egg whites</strong> omelette with spinach + onion + tomato + minimal oil · <strong>1 whole-wheat paratha</strong> (dry) · <strong>1 glass toned milk</strong> · <strong>1 amla</strong>',
+       tags:[{c:'to',l:'~460 kcal'},{c:'tg',l:'50g protein'},{c:'ty',l:'36g carbs'}],
+       note:'Higher egg white ratio on Thursday keeps fat lower while maintaining protein. Spinach in omelette adds iron — critical for energy and hair health.'},
+      {dot:'bl',t:'1:00 PM · LUNCH',nm:'Mixed Dal Soup-Style Lunch',
+       f:'<strong>1 cup mixed dal</strong> (moong + masoor together, thicker consistency) · <strong>2 rotis</strong> · <strong>1 cup curd</strong> · <strong>Large salad</strong> · <strong>1 sabzi</strong> · <em>Optional: 2 boiled eggs on side</em>',
+       tags:[{c:'to',l:'~490 kcal'},{c:'tg',l:'36g protein'},{c:'tr',l:'NO rice'}],
+       note:'Mixed dal has higher amino acid diversity. Thursday lunch is slightly simpler — energy conservation before a big lift session.'},
+      {dot:'',t:'4:00 PM · SNACK',nm:'Dahi + Chana Protein Snack',
+       f:'<strong>1 cup low-fat dahi</strong> + <strong>1 handful roasted chana</strong> (unsalted) · 1 black coffee',
+       tags:[{c:'to',l:'~210 kcal'},{c:'tg',l:'22g protein'},{c:'tb',l:'Probiotic'}],
+       note:'Dahi provides casein protein + probiotics. Roasted chana adds crunch, fibre, and plant protein. Great alternative to whey for variety.'},
+      {dot:'yw',t:'8:00 PM · DINNER',nm:'Chicken + Egg Dinner',
+       f:'<strong>130g grilled chicken breast</strong> + <strong>2 boiled eggs</strong> (protein combination for variety) · <strong>Stir-fried broccoli</strong> (or any green vegetable) with garlic · <strong>Large salad</strong> · <em>NO roti. NO rice.</em>',
+       tags:[{c:'to',l:'~370 kcal'},{c:'tg',l:'55g protein'},{c:'tr',l:'Zero carbs'}],
+       note:'Chicken + eggs combination provides complete amino acid profile. Broccoli has DIM compound that supports testosterone metabolism.'},
+      {dot:'dm',t:'10:00 PM · OPTIONAL',nm:'Casein Wind-Down',
+       f:'<strong>1 cup dahi</strong> + Ashwagandha + Magnesium',
+       tags:[{c:'to',l:'~130 kcal'},{c:'tg',l:'10g protein'}],note:''},
+    ]},
+  fri:{lbl:'Friday — Training Day',type:'train',
+    note:'Training day. Slightly higher carbs at breakfast to fuel the final heavy session of the week. Total: ~1,960 kcal · 192g protein · 128g carbs · 72g fat.',
+    meals:[
+      {dot:'',t:'6:00 AM · PRE-GYM',nm:'Pre-Workout Fuel',
+       f:'<strong>½ banana</strong> + <strong>5 almonds</strong> + warm lemon water',
+       tags:[{c:'to',l:'~100 kcal'},{c:'tg',l:'15g carbs'}],note:''},
+      {dot:'gn',t:'8:15 AM · BREAKFAST',nm:'Friday Power Breakfast',
+       f:'<strong>3 whole eggs + 2 egg whites</strong> scrambled · <strong>1½ whole-wheat parathas</strong> (slight carb increase for heavy Friday session) · <strong>1 glass toned milk</strong> · <strong>1 amla</strong>',
+       tags:[{c:'to',l:'~500 kcal'},{c:'tg',l:'46g protein'},{c:'ty',l:'48g carbs'}],
+       note:'Slightly more carbs on Friday to fuel the week\'s strongest session. This is the only day with 1.5 parathas — all other days 1 max.'},
+      {dot:'bl',t:'1:00 PM · LUNCH',nm:'Rajma Lite + Salad Lunch',
+       f:'<strong>¾ cup rajma</strong> (kidney beans — highest plant protein, limit to ¾ cup to avoid bloat) · <strong>2 rotis</strong> · <strong>1 cup curd</strong> · <strong>Large salad</strong> · <strong>1 sabzi</strong>',
+       tags:[{c:'to',l:'~500 kcal'},{c:'tg',l:'32g protein'},{c:'tr',l:'NO rice'}],
+       note:'Rajma once per week — highest plant protein source but limit portion. Rich in fibre and iron. Good end-of-week variety.'},
+      {dot:'',t:'4:00 PM · SNACK',nm:'Whey + Almonds',
+       f:'<strong>1 scoop whey isolate</strong> in cold water · <strong>10 almonds</strong> · 1 black coffee',
+       tags:[{c:'to',l:'~230 kcal'},{c:'tg',l:'28g protein'}],
+       note:'Last coffee of the week before the weekend. Almonds provide Vitamin E for skin health.'},
+      {dot:'yw',t:'8:00 PM · DINNER',nm:'Fish Dinner — Friday',
+       f:'<strong>160g grilled pomfret or rohu</strong> with mustard + turmeric + lemon marinade · <strong>Stir-fried mixed vegetables</strong> · <strong>Large salad</strong> · <em>NO roti. NO rice.</em>',
+       tags:[{c:'to',l:'~360 kcal'},{c:'tg',l:'48g protein'},{c:'tr',l:'Zero carbs'},{c:'tg',l:'Omega-3'}],
+       note:'Friday fish dinner. Omega-3 from fish combined with the weekend rest days makes this the optimal fish night for inflammation recovery.'},
+      {dot:'dm',t:'10:00 PM · OPTIONAL',nm:'Casein Wind-Down',
+       f:'<strong>1 cup dahi</strong> + Ashwagandha + Magnesium',
+       tags:[{c:'to',l:'~130 kcal'},{c:'tg',l:'10g protein'}],note:''},
+    ]},
+  sat:{lbl:'Saturday — Training Day (Arms + Abs)',type:'train',
+    note:'Lighter training day (Arms + Abs only). Same nutrition protocol. One cheat meal allowed at lunch — the only one per week. Total: ~1,950 kcal · 188g protein · 125g carbs · 74g fat.',
+    meals:[
+      {dot:'',t:'6:00 AM · PRE-GYM',nm:'Pre-Workout Fuel',
+       f:'<strong>½ banana</strong> + <strong>5 almonds</strong> + warm lemon water',
+       tags:[{c:'to',l:'~100 kcal'},{c:'tg',l:'15g carbs'}],note:''},
+      {dot:'gn',t:'8:15 AM · BREAKFAST',nm:'Saturday Egg Feast',
+       f:'<strong>4 whole eggs + 1 egg white</strong> omelette (maximum whole eggs — good fats + protein) · <strong>1 multigrain toast</strong> · <strong>1 glass toned milk</strong> · <strong>1 amla</strong>',
+       tags:[{c:'to',l:'~480 kcal'},{c:'tg',l:'44g protein'},{c:'ty',l:'25g carbs'}],
+       note:'Saturday allows slightly more whole eggs for healthy fats. Multigrain toast instead of paratha for variety.'},
+      {dot:'bl',t:'1:00 PM · LUNCH',nm:'★ Saturday Cheat Meal (1× per week)',
+       f:'<strong>ONE cheat meal — your choice.</strong> Best options: Dal makhani + 2 rotis (avoid naan) · OR Chole + 2 bhature (the splurge) · OR Chicken biryani (single serving) · OR restaurant of your choice. <em>Eat mindfully — stop when 80% full. No dessert.</em>',
+       tags:[{c:'ty',l:'~600–800 kcal'},{c:'ty',l:'1× per week only'},{c:'tr',l:'No dessert'}],
+       note:'This is your only weekly cheat. Enjoy it without guilt. The entire week\'s discipline earns this meal. Stop at 80% full. No cold drink alongside it.'},
+      {dot:'',t:'4:00 PM · SNACK',nm:'Post-Cheat Correction Snack',
+       f:'<strong>1 scoop whey isolate</strong> in cold water · <strong>Green tea</strong> (no sugar) — green tea helps metabolise the cheat meal faster',
+       tags:[{c:'to',l:'~120 kcal'},{c:'tg',l:'28g protein'},{c:'tg',l:'Recovery'}],
+       note:'After the cheat meal, back on track immediately. Whey + green tea helps restore blood sugar and metabolism.'},
+      {dot:'yw',t:'8:00 PM · DINNER',nm:'Clean Protein Dinner Post-Cheat',
+       f:'<strong>200g grilled chicken breast</strong> (higher protein to compensate for cheat at lunch) · <strong>Large salad</strong> full bowl · <strong>Stir-fried vegetables</strong> · <em>NO roti. NO rice.</em>',
+       tags:[{c:'to',l:'~350 kcal'},{c:'tg',l:'55g protein'},{c:'tr',l:'Zero carbs'}],
+       note:'Highest protein, zero carb dinner on Saturday — compensates for the cheat lunch. Back fully on protocol.'},
+      {dot:'dm',t:'10:00 PM · OPTIONAL',nm:'Casein Wind-Down',
+       f:'<strong>1 cup dahi</strong> + Ashwagandha + Magnesium + Triphala',
+       tags:[{c:'to',l:'~130 kcal'},{c:'tg',l:'10g protein'}],note:'Extra Triphala on Saturday night helps detox and reset the gut after the cheat meal.'},
+    ]},
+  sun:{lbl:'Sunday — Full Rest Day',type:'rest',
+    note:'Complete rest day. Lowest calories of the week — no training. Protein maintained at 185g. Total: ~1,650 kcal · 185g protein · 75g carbs · 65g fat. The caloric deficit today is your fat-burning bonus.',
+    meals:[
+      {dot:'',t:'8:00 AM · BREAKFAST',nm:'Sunday Protein Breakfast — Late',
+       f:'<strong>3 whole eggs + 3 egg whites</strong> scrambled · <strong>1 slice multigrain toast</strong> · <strong>1 glass toned milk</strong> · <strong>1 amla</strong> · <strong>Collagen 10g</strong> in warm water',
+       tags:[{c:'to',l:'~420 kcal'},{c:'tg',l:'50g protein'},{c:'ty',l:'22g carbs'}],
+       note:'Sunday sleep in slightly. Lower carbs — no training today. Collagen on empty stomach first thing (in warm water before breakfast).'},
+      {dot:'bl',t:'1:00 PM · LUNCH',nm:'Sunday Dal + Sabzi — Comfort Meal',
+       f:'<strong>1 cup moong dal</strong> (easiest to digest — good for gut rest day) · <strong>2 rotis</strong> · <strong>1 cup curd</strong> · <strong>2–3 sabzi varieties</strong> (cook extra for the week) · <strong>Large salad</strong>',
+       tags:[{c:'to',l:'~470 kcal'},{c:'tg',l:'32g protein'},{c:'tr',l:'NO rice'}],
+       note:'Sunday lunch is your meal prep time. Cook extra dal, sabzi, and boil a batch of eggs for the coming week. Moong dal is gentlest on the digestive system.'},
+      {dot:'',t:'4:00 PM · SNACK',nm:'Sunday Protein Snack',
+       f:'<strong>1 scoop whey isolate</strong> in cold water · <strong>10 walnuts + 5 almonds</strong> · 1 green tea',
+       tags:[{c:'to',l:'~240 kcal'},{c:'tg',l:'30g protein'},{c:'tb',l:'Omega-3'}],
+       note:'Sunday is the best day for walnuts — omega-3 fats support next week\'s training performance when consumed at rest.'},
+      {dot:'yw',t:'8:00 PM · DINNER',nm:'Sunday Light Protein Dinner',
+       f:'<strong>150g grilled fish</strong> OR <strong>180g chicken breast</strong> · <strong>Stir-fried mixed vegetables</strong> (any combination) · <strong>Large salad</strong> + <strong>1 cup dahi</strong> · <em>NO roti. NO rice.</em>',
+       tags:[{c:'to',l:'~350 kcal'},{c:'tg',l:'50g protein'},{c:'tr',l:'Zero carbs'}],
+       note:'Lightest dinner of the week. Sunday evening sets you up for Monday\'s big training day. High protein, zero starch, early eating if possible.'},
+      {dot:'dm',t:'10:00 PM · OPTIONAL',nm:'Sunday Recovery Wind-Down',
+       f:'<strong>Warm turmeric milk</strong> (toned) + Ashwagandha + Magnesium 300mg + Triphala · <em>Consider: extra 0.5mg Melatonin if sleep quality poor</em>',
+       tags:[{c:'to',l:'~130 kcal'},{c:'tg',l:'8g protein'},{c:'tg',l:'Recovery night'}],
+       note:'Sunday sleep is the most important sleep of the week — sets recovery for the entire Monday-Friday training block. Magnesium + Ashwagandha will dramatically improve sleep depth.'},
+    ]},
+};
+
+// ═══ RENDER FUNCTIONS ═══
+function showPage(name, btn) {
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pg-'+name).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('content').scrollTo({top:0,behavior:'smooth'});
+}
+
+function showDay(day, btn) {
+  document.querySelectorAll('.dp:not(.rp)').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  const d = wdays[day];
+  const exHTML = d.ex.map((e,i)=>`
+    <div class="ex-c">
+      <div class="ex-top">
+        <div class="ex-nm">${e.n}</div>
+        <div class="chip ch-${e.t}">${e.chip}</div>
+      </div>
+      <div class="ex-st">${e.sets}</div>
+      <div class="ex-btn" onclick="toggleEx(${i})">▶ Form &amp; coaching cues</div>
+      <div class="ex-detail" id="exd-${i}">
+        <div class="ex-fm">${e.fm}</div>
+        <div class="ex-wy">→ ${e.wy}</div>
+      </div>
+    </div>`).join('');
+  document.getElementById('day-panel').innerHTML=`
+    <div class="note" style="border-color:${d.col};background:rgba(255,255,255,0.025);color:var(--sub);margin-bottom:12px">${d.note}</div>
+    <div class="lbl">${d.lbl}</div>${exHTML}`;
+}
+
+function toggleEx(i) {
+  const el=document.getElementById('exd-'+i);
+  const isOpen=el.classList.contains('open');
+  document.querySelectorAll('.ex-detail').forEach(d=>d.classList.remove('open'));
+  document.querySelectorAll('.ex-btn').forEach(b=>b.textContent='▶ Form & coaching cues');
+  if(!isOpen){el.classList.add('open');el.previousElementSibling.textContent='▼ Hide cues';}
+}
+
+function showDiet(day, btn) {
+  document.querySelectorAll('.ddp').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  const d = dietDays[day];
+  const dotCls={'':'','gn':'gn','bl':'bl','yw':'yw','dm':'dm'};
+  const mealsHTML = d.meals.map(m=>`
+    <div class="mi">
+      <div class="mi-dot ${m.dot}"></div>
+      <div class="mi-t ${m.dot}">${m.t}</div>
+      <div class="mi-nm">${m.nm}</div>
+      <div class="mi-f">${m.f}</div>
+      <div class="tags">${m.tags.map(t=>`<span class="tag ${t.c}">${t.l}</span>`).join('')}</div>
+      ${m.note?`<div class="mi-note">${m.note}</div>`:''}
+    </div>`).join('');
+  document.getElementById('diet-panel').innerHTML=`
+    <div class="note gn" style="margin-bottom:12px"><b>${d.lbl}</b> — ${d.note}</div>
+    <div class="card" style="padding-top:18px"><div style="padding-left:4px"><div style="position:relative;padding-left:22px">
+      <div style="position:absolute;left:7px;top:6px;bottom:0;width:1.5px;background:linear-gradient(to bottom,var(--or),var(--b1) 88%)"></div>
+      ${mealsHTML}
+    </div></div></div>`;
+}
+
+// INIT
+setTimeout(()=>{const b=document.getElementById('ibanner');if(b)b.style.display='none';},9000);
+showDay('mon',document.getElementById('wp-mon'));
+showDiet('mon',document.querySelector('.ddp'));
+</script>
+</body>
+</html>
